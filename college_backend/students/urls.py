@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import SendOTPView, VerifyOTPView, RegisterUserView, FaceUploadView,send_otp,verify_otp,Hello,LoginView,add_book,get_books,UserProfileView,recognize_face,search_books,admin_book_requests,update_request_status,handle_request_action,admin_requests_list,BookView,RegisterBookView,PendingRequestsView,UpdateRequestView,BookStatusView,get_students,mark_attendance,attendance_today
+from .views import SendOTPView, VerifyOTPView, RegisterUserView, FaceUploadView,send_otp,verify_otp,Hello,LoginView,add_book,get_books,UserProfileView,recognize_face,search_books,admin_book_requests,update_request_status,handle_request_action,admin_requests_list,BookView,RegisterBookView,PendingRequestsView,UpdateRequestView,BookStatusView,get_students,mark_attendance,attendance_today,get_attendance_summary,face_recognizes
 from django.conf import settings
 from django.conf.urls.static import static
 urlpatterns = [
@@ -23,9 +23,10 @@ urlpatterns = [
      path('pending-requests/', PendingRequestsView.as_view(), name='pending-requests'),
      path('update-request/', UpdateRequestView.as_view(), name='update-request'),
      path('book-status/<str:roll_number>/', BookStatusView.as_view(), name='book-status'),
+     path('face-recognize/', face_recognizes, name='face_recognize'),
      path('admin/requests/', admin_book_requests, name='admin-book-requests'),
     #  path('attendance-summary/<str:roll_number>/', get_attendance_summary),
-
+    path('attendance-summary/<str:roll_number>/', get_attendance_summary, name='attendance-summary'),
     path('admin/requests/<int:request_id>/<str:action>/', update_request_status, name='update-request-status'),
     path('api/admin/requests/', admin_requests_list),
     path('api/admin/requests/<int:request_id>/<str:action>/', handle_request_action),

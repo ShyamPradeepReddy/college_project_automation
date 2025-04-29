@@ -58,6 +58,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'college_backend.urls'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    'http://localhost:8000',
 ]
 CORS_ALLOWED_ALL_ORIGINS=True
 CORS_ALLOW_CREDENTIALS = True
@@ -69,6 +70,7 @@ REST_FRAMEWORK={
 }
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
+    'http://localhost:8000',
 ]
 # CORS_ALLOW_HEADERS=[
 #     # 'access-control-allow-origin',

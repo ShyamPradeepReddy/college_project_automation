@@ -10,7 +10,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status
 from .models import User
 from .serializers import UserSerializer,BookSerializer,AllUsers,BookRequestSerializer,BookRequestSerializer1,AttendanceSerializer
-
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
 
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -34,10 +35,7 @@ import threading
 from datetime import date
 import cv2
 import os
-import numpy as np
-from rest_framework.response import Response
-from django.http import JsonResponse
-from deepface import DeepFace
+
 from django.contrib.auth import get_user_model
 from django.conf import settings
 
@@ -45,6 +43,80 @@ User = get_user_model()  # Use the existing User model
 
 FACES_DIR = os.path.join(settings.MEDIA_ROOT, "faces")  # Face images directory
 
+from django.http import JsonResponse
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import MultiPartParser
+import face_recognition
+import cv2
+import numpy as np
+import os  # Assuming student info is stored here
+
+KNOWN_FACES_DIR = 'media/faces/'
+
+known_encodings = []
+known_roll_numbers = []
+
+def load_known_faces():
+    known_encodings.clear()
+    known_roll_numbers.clear()
+
+    for filename in os.listdir(KNOWN_FACES_DIR):
+        if filename.endswith((".jpg", ".jpeg", ".png")):
+            path = os.path.join(KNOWN_FACES_DIR, filename)
+            image = face_recognition.load_image_file(path)
+            encodings = face_recognition.face_encodings(image)
+            if encodings:
+                known_encodings.append(encodings[0])
+                roll_number = os.path.splitext(filename)[0]
+                known_roll_numbers.append(roll_number)
+
+load_known_faces()
+
+@api_view(["POST"])
+@parser_classes([MultiPartParser])
+def face_recognizes(request):
+    image_file = request.FILES.get("frame")
+    if not image_file:
+        return JsonResponse({"error": "No image uploaded"}, status=400)
+
+    # Convert uploaded image to OpenCV format
+    np_img = np.frombuffer(image_file.read(), np.uint8)
+    frame = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+
+    if frame is None:
+        return JsonResponse({"error": "Invalid image format"}, status=400)
+
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    face_locations = face_recognition.face_locations(rgb_frame)
+    if not face_locations:
+        return JsonResponse({"error": "No face detected in the image"}, status=404)
+
+    try:
+        face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+    except Exception as e:
+        return JsonResponse({"error": f"Encoding error: {str(e)}"}, status=500)
+
+    for encoding in face_encodings:
+        distances = face_recognition.face_distance(known_encodings, encoding)
+        if len(distances) == 0:
+            continue
+
+        best_match_index = np.argmin(distances)
+        if distances[best_match_index] < 0.6:
+            roll_number = known_roll_numbers[best_match_index]
+            print(roll_number)
+            try:
+                user = User.objects.filter(roll_number=roll_number).first()
+                print("User details ra",user)
+                serializer=AllUsers(user)
+                # serializer["face_image"] = f"/media/faces/{roll_number}.jpg"
+                # print(serializer.face_image)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            except User.DoesNotExist:
+                return JsonResponse({"error": "Student not found in database"}, status=404)
+
+    return JsonResponse({"error": "Face not recognized"}, status=404)
 
 from django.db.models import Q
 import django.db.models as models
@@ -61,6 +133,32 @@ from django.utils import timezone
 import json
 from .models import Attendance, User
 
+from django.db.models import Count
+
+@csrf_exempt
+def get_attendance_summary(request, roll_number):
+    attendance_records = Attendance.objects.filter(roll_number=roll_number)
+
+    present_count = attendance_records.filter(status='present').count()
+    absent_count = attendance_records.filter(status='absent').count()
+    total_days = present_count + absent_count
+
+    percentage = (present_count / total_days) * 100 if total_days > 0 else 0
+
+    attendance_data = list(attendance_records.values('date', 'status', 'faculty_updated'))
+
+    student_info = attendance_records.first()
+    print('present_days', present_count)
+    return JsonResponse({
+        'roll_number': roll_number,
+        'present_days': present_count,
+        'absent_days': absent_count,
+        'attendance_percentage': round(percentage, 2),
+        'records': attendance_data,
+        'department': student_info.department if student_info else "",
+        'branch': student_info.branch if student_info else "",
+        'faculty_last_updated': student_info.faculty_updated if student_info else ""
+    })
 
 @api_view(['GET'])
 def attendance_today(request):
@@ -378,38 +476,81 @@ class UserProfileView(APIView):
 @api_view(["POST"])
 def send_otp(request):
     email = request.data.get("email")
-    fors=request.data.get("for")
-    print(email)
-    print(fors)
-    message=""
-    subject=""
-    print(fors)
+    fors = request.data.get("for")
+
+    if not email or not fors:
+        return Response({"error": "Email and purpose ('for') are required"}, status=400)
+
     otp = random.randint(100000, 999999)
     otp_storage[email] = otp
-    print(fors=="register")
-    if User.objects.filter(email=email).exists():
-        if fors=="reset_password":
-            subject="Password Reset OTP"
-            message = f"Dear User,\n\nYour OTP to Reset Password at AITS Tirupati, is: {otp}\n\nThis OTP is valid for [5 or 10] minutes. Please do not share it with anyone.\n\nIf you did not request this, please ignore this email.\n\nBest regards,\nYour developer Pradeep from AITS Titupati"
-        return Response({"EMail Already registered try to login"},status=400)
-    elif fors=="register":
-        subject="Email Verification OTP"
-        message = f"Dear User,\n\nYour OTP for registration at AITS Tirupati, is: {otp}\n\nThis OTP is valid for [5 or 10] minutes. Please do not share it with anyone.\n\nIf you did not request this, please ignore this email.\n\nBest regards,\nYour developer Pradeep from AITS Titupati"
-    if not email:
-        return Response({"error": "Email is required"}, status=400)
 
+    if fors == "reset_password":
+        if not User.objects.filter(email=email).exists():
+            return Response({"error": "Email not registered"}, status=404)
+        subject = "Reset Your Password - AITS Tirupati"
+        headline = "Password Reset Request"
+        purpose_line = "We received a request to reset your password for your AITS Tirupati account."
+    elif fors == "register":
+        if User.objects.filter(email=email).exists():
+            return Response({"error": "Email already registered, try to log in."}, status=400)
+        subject = "Verify Your Email - AITS Tirupati"
+        headline = "Complete Your Registration"
+        purpose_line = "Welcome to AITS Tirupati! Please verify your email to complete the registration."
+    else:
+        return Response({"error": "Invalid purpose for OTP"}, status=400)
+
+    # 🔥 HTML content with logo and styling
+    html_message = f"""
+    <html>
+    <body style="font-family: 'Segoe UI', sans-serif; background-color: #f2f4f6; margin: 0; padding: 0;">
+        <div style="max-width: 600px; margin: 30px auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            
+            <div style="background-color: #004080; padding: 20px; text-align: center;">
+                <img src="media/AITS-tirupati-logo.png" alt="AITS Tirupati" style="height: 70px; margin-bottom: 10px;">
+                <h2 style="color: white; margin: 0;">AITS Tirupati</h2>
+            </div>
+
+            <div style="padding: 30px;">
+                <h3 style="color: #2c3e50;">{headline}</h3>
+                <p style="font-size: 16px; color: #555;">{purpose_line}</p>
+                
+                <p style="font-size: 18px; margin: 20px 0;">Your One-Time Password (OTP) is:</p>
+                <div style="font-size: 32px; font-weight: bold; color: #e74c3c; margin-bottom: 20px;">{otp}</div>
+
+                <p style="color: #777;">This OTP is valid for <strong>10 minutes</strong>. Please do not share it with anyone.</p>
+                <p style="color: #999;">If you did not request this email, you can safely ignore it.</p>
+
+                <hr style="margin: 30px 0;">
+
+                <p style="font-size: 14px; color: #999;">
+                    Need help? Contact support@aitstpt.ac.in<br>
+                    Sent by AITS Tirupati | Developed by Pradeep
+                </p>
+            </div>
+
+            <div style="background-color: #004080; padding: 10px; text-align: center; color: white; font-size: 12px;">
+                © {2025} AITS Tirupati. All rights reserved.
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    # Fallback plain text version
+    plain_message = strip_tags(html_message)
 
     try:
-        send_mail(
+        email_obj = EmailMultiAlternatives(
             subject=subject,
-            message=message,
-            from_email="your-email@gmail.com",
-            recipient_list=[email],
-            fail_silently=False,
+            body=plain_message,
+            from_email="support@aitstpt.ac.in",  # Use your actual verified email
+            to=[email],
         )
-        return Response({"OTP sent successfully"})
+        email_obj.attach_alternative(html_message, "text/html")
+        email_obj.send()
+        return Response({"message": "OTP sent successfully"})
     except Exception as e:
-        return Response({"error": str(e)}, status=500)  # Log exact error
+        return Response({"error": str(e)}, status=500)
 
 @csrf_exempt
 def verify_otp(request):
