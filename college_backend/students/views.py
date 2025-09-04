@@ -477,7 +477,7 @@ class UserProfileView(APIView):
 def send_otp(request):
     email = request.data.get("email")
     fors = request.data.get("for")
-
+    print(email,fors)
     if not email or not fors:
         return Response({"error": "Email and purpose ('for') are required"}, status=400)
 
@@ -491,6 +491,7 @@ def send_otp(request):
         headline = "Password Reset Request"
         purpose_line = "We received a request to reset your password for your AITS Tirupati account."
     elif fors == "register":
+        print("Hello world")
         if User.objects.filter(email=email).exists():
             return Response({"error": "Email already registered, try to log in."}, status=400)
         subject = "Verify Your Email - AITS Tirupati"
