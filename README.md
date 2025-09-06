@@ -10,7 +10,7 @@ The system includes a website with dashboards for students, faculty, and admin, 
 Students can upload PDF books and ask questions, with the chatbot processing the content intelligently, reducing manual workload and bringing automation to the education system.
 
 ---
-
+(college_backend/IMG-20250422-WA0008(1))
 ### 🏗️ Architecture
 
 #### Modules Involved:
