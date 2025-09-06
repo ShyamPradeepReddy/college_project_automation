@@ -10,7 +10,7 @@ The system includes a website with dashboards for students, faculty, and admin, 
 Students can upload PDF books and ask questions, with the chatbot processing the content intelligently, reducing manual workload and bringing automation to the education system.
 
 ---
-![User Interface (Home Page)](college_backend/IMG-20250422-WA0008(1).jpg)
+![(Home Page)](college_backend/IMG-20250422-WA0008(1).jpg)
 ### 🏗️ Architecture
 
 #### Modules Involved:
@@ -34,9 +34,8 @@ Students can upload PDF books and ask questions, with the chatbot processing the
     - PostgreSQL/MySQL for storing user data, attendance records, and book metadata.
 
 #### Flow Diagram:
-![User Interface (Home Page)](college_backend
-/IMG-20250411-WA0001(1).jpg)
 
+![(Flow Diagram)](college_backend/IMG-20250411-WA0001(1).jpg)
 OpenCV + Neural Network based encoding and recognition.
 
 
@@ -63,7 +62,7 @@ Flow Diagram: User → Dashboard → (Attendance / Library Chatbot)
 4. Software and Hardware Requirements
 Software:
 Frontend: React JS, HTML, CSS, JavaScript
-![User Interface (Home Page)](college_backend/IMG-20250422-WA0011(1).jpg)
+![Chatbot](college_backend/IMG-20250422-WA0011(1).jpg)
 
 Backend: Django (Python), Django REST Framework
 
@@ -78,7 +77,7 @@ IDE/Tools: VS Code, Anaconda, Postman
 Hardware:
 Webcam (Laptop/USB/Phone as webcam via DroidCam)
 
-![User Interface (Home Page)](college_backend/IMG-20250422-WA0012(1).jpg)
+![Dashboard](college_backend/IMG-20250422-WA0012(1).jpg)
 
 4 GB RAM minimum, 64-bit OS
 
@@ -107,7 +106,7 @@ Students face the camera; system marks attendance in real-time.
 
 Faculty Dashboard:
 
-![User Interface (Home Page)](college_backend/IMG-20250422-WA0010(1).jpg)
+![Register page of students](college_backend/IMG-20250422-WA0010(1).jpg)
 
 View students under their department.
 
