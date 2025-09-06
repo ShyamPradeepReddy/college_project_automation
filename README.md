@@ -10,7 +10,7 @@ The system includes a website with dashboards for students, faculty, and admin, 
 Students can upload PDF books and ask questions, with the chatbot processing the content intelligently, reducing manual workload and bringing automation to the education system.
 
 ---
-(college_backend/IMG-20250422-WA0008(1))
+![User Interface (Home Page)](college_backend/IMG-20250422-WA0008(1).jpg)
 ### 🏗️ Architecture
 
 #### Modules Involved:
@@ -34,7 +34,8 @@ Students can upload PDF books and ask questions, with the chatbot processing the
     - PostgreSQL/MySQL for storing user data, attendance records, and book metadata.
 
 #### Flow Diagram:
-
+![User Interface (Home Page)](college_backend
+/IMG-20250411-WA0001(1).jpg)
 
 OpenCV + Neural Network based encoding and recognition.
 
@@ -62,7 +63,7 @@ Flow Diagram: User → Dashboard → (Attendance / Library Chatbot)
 4. Software and Hardware Requirements
 Software:
 Frontend: React JS, HTML, CSS, JavaScript
-
+![User Interface (Home Page)](college_backend/IMG-20250422-WA0011(1).jpg)
 
 Backend: Django (Python), Django REST Framework
 
@@ -77,6 +78,7 @@ IDE/Tools: VS Code, Anaconda, Postman
 Hardware:
 Webcam (Laptop/USB/Phone as webcam via DroidCam)
 
+![User Interface (Home Page)](college_backend/IMG-20250422-WA0012(1).jpg)
 
 4 GB RAM minimum, 64-bit OS
 
@@ -105,6 +107,7 @@ Students face the camera; system marks attendance in real-time.
 
 Faculty Dashboard:
 
+![User Interface (Home Page)](college_backend/IMG-20250422-WA0010(1).jpg)
 
 View students under their department.
 
@@ -135,6 +138,7 @@ For example: “What is the definition of AI from this book?” → AI replies c
 
 6. Screenshots
 
+![User Interface (Home Page)](college_backend/IMG-20250422-WA0013(1).jpg)
 
 
 
@@ -180,8 +184,8 @@ Haystack – https://haystack.deepset.ai
 PyMuPDF (fitz) – https://pymupdf.readthedocs.io
 
 
-9. Team Members Photos with Project
 
+![User Interface (Home Page)](college_backend/IMG-20250422-WA0009(1).jpg)
 
 
 
@@ -254,11 +258,6 @@ React chatbot UI with backend integration.
 
 ---
 
-### 📸 Screenshots
-
-(*Add relevant screenshots here*)
-
----
 
 ### ✅ Conclusion and Future Enhancement
 
@@ -285,11 +284,6 @@ This system demonstrates how computer vision and AI can automate routine academi
 
 ---
 
-### 👥 Team Member Photos with Project
-
-(*Add team photos and project images here*)
-
----
 
 ### 🤖 Additional AI Chatbot with PDF Feature
 
